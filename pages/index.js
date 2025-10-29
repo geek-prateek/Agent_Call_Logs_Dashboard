@@ -53,8 +53,10 @@ export default function Dashboard() {
           <table className="min-w-full text-sm">
             <thead className="bg-gray-100">
               <tr>
-                <th className="p-2 text-left">Phone</th>
+                <th className="p-2 text-left">User Number</th>
+                <th className="p-2 text-left">Conversation type</th>
                 <th className="p-2 text-left">Duration (s)</th>
+                <th className="p-2 text-left">Hangup by</th>
                 <th className="p-2 text-left">Status</th>
                 <th className="p-2 text-left">Cost</th>
                 <th className="p-2 text-left">Timestamp</th>
@@ -63,16 +65,18 @@ export default function Dashboard() {
             </thead>
             <tbody>
               {calls.length === 0 ? (
-                <tr><td colSpan="6" className="p-4 text-center">No calls</td></tr>
+                <tr><td colSpan="7" className="p-4 text-center">No calls</td></tr>
               ) : calls.map(call => (
                 <tr key={call.id} className="border-t">
                   <td className="p-2">{call.phone_number || call.phone || '-'}</td>
+                  <td className="p-2">{call.conversation_type || '-'}</td>
                   <td className="p-2">{call.duration || '-'}</td>
+                  <td className="p-2">{call.hangup_by || '-'}</td>
                   <td className="p-2">
                     <span className={call.status === 'completed' ? 'text-green-600' : 'text-red-600'}>{call.status}</span>
                   </td>
                   <td className="p-2">{call.cost != null ? `$${Number(call.cost).toFixed(3)}` : '-'}</td>
-                  <td className="p-2">{new Date(call.created_at).toLocaleString()}</td>
+                  <td className="p-2">{new Date(call.event_timestamp || call.created_at).toLocaleString()}</td>
                   <td className="p-2">
                     {call.status === 'completed' ? (
                       <button className="text-blue-600 underline" onClick={() => setSelected(call)}>Recordings</button>

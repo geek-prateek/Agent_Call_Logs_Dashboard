@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 export default function ConversationModal({ call, onClose }) {
   if (!call) return null;
   const transcript = call.transcript || [];
+  const recordings = Array.isArray(call.recordings) ? call.recordings : (call.recording_url ? [call.recording_url] : []);
+  const summary = call.summary;
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-6">
@@ -16,13 +18,17 @@ export default function ConversationModal({ call, onClose }) {
 
         <div className="space-y-6">
           <div>
-            <h3 className="text-sm font-medium">Recording</h3>
-            {call.recording_url ? (
-              <audio controls className="w-full mt-2">
-                <source src={call.recording_url} type="audio/mpeg" />
-                Your browser does not support the audio element.
-              </audio>
-            ) : <p className="text-sm text-gray-500">No recording</p>}
+            <h3 className="text-sm font-medium">Recordings</h3>
+            {recordings.length > 0 ? (
+              <div className="mt-2 space-y-3">
+                {recordings.map((url, idx) => (
+                  <audio key={idx} controls className="w-full">
+                    <source src={url} type="audio/mpeg" />
+                    Your browser does not support the audio element.
+                  </audio>
+                ))}
+              </div>
+            ) : <p className="text-sm text-gray-500">No recordings</p>}
           </div>
 
           <div>
@@ -40,6 +46,13 @@ export default function ConversationModal({ call, onClose }) {
               )}
             </div>
           </div>
+
+          {summary && (
+            <div>
+              <h3 className="text-sm font-medium">Summary</h3>
+              <div className="mt-2 border rounded p-3 bg-gray-50 text-sm whitespace-pre-wrap">{summary}</div>
+            </div>
+          )}
 
           {call.activity_logs && (
             <div>

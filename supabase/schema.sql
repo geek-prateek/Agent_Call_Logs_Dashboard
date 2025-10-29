@@ -12,8 +12,22 @@ create table if not exists calls (
   transcript jsonb,
   activity_logs jsonb,
   cost numeric(10,6),
+  conversation_type text,
+  hangup_by text,
+  event_timestamp timestamptz,
+  last_updated timestamptz,
+  summary text,
+  recordings jsonb,
   created_at timestamptz default now()
 );
 
 create index if not exists idx_calls_created_at on calls (created_at desc);
 create index if not exists idx_calls_phone_number on calls (phone_number);
+
+-- Safe alters for existing deployments
+alter table calls add column if not exists conversation_type text;
+alter table calls add column if not exists hangup_by text;
+alter table calls add column if not exists event_timestamp timestamptz;
+alter table calls add column if not exists last_updated timestamptz;
+alter table calls add column if not exists summary text;
+alter table calls add column if not exists recordings jsonb;
