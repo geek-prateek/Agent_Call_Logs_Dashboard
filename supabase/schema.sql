@@ -31,3 +31,23 @@ alter table calls add column if not exists event_timestamp timestamptz;
 alter table calls add column if not exists last_updated timestamptz;
 alter table calls add column if not exists summary text;
 alter table calls add column if not exists recordings jsonb;
+
+-- Aggregated stats for dashboard
+create or replace function get_call_stats()
+returns table(
+  total_executions bigint,
+  total_cost numeric,
+  total_duration bigint,
+  avg_cost numeric,
+  avg_duration numeric
+)
+language sql
+as $$
+  select
+    count(*)::bigint as total_executions,
+    coalesce(sum(cost), 0)::numeric as total_cost,
+    coalesce(sum(duration), 0)::bigint as total_duration,
+    coalesce(avg(cost), 0)::numeric as avg_cost,
+    coalesce(avg(duration), 0)::numeric as avg_duration
+  from calls;
+$$;

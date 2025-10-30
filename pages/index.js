@@ -6,14 +6,19 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
   const [page, setPage] = useState(0)
+  const [stats, setStats] = useState(null)
   const PAGE_SIZE = 20
 
   async function load() {
     setLoading(true)
     try {
-      const res = await fetch(`/api/calls?limit=${PAGE_SIZE}&offset=${page * PAGE_SIZE}`)
-      const data = await res.json()
-      setCalls(data || [])
+      const [resCalls, resStats] = await Promise.all([
+        fetch(`/api/calls?limit=${PAGE_SIZE}&offset=${page * PAGE_SIZE}`),
+        fetch('/api/stats')
+      ])
+      const [dataCalls, dataStats] = await Promise.all([resCalls.json(), resStats.json()])
+      setCalls(dataCalls || [])
+      setStats(dataStats || null)
     } catch (e) {
       console.error(e)
     } finally {
@@ -28,6 +33,35 @@ export default function Dashboard() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Agent Call Logs</h1>
+
+      {/* Metrics cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+        <div className="border rounded p-4">
+          <div className="text-sm text-gray-600">Total Executions</div>
+          <div className="text-3xl font-bold mt-2">{stats ? stats.total_executions : '-'}</div>
+          <div className="text-xs text-gray-500 mt-1">All call attempts</div>
+        </div>
+        <div className="border rounded p-4">
+          <div className="text-sm text-gray-600">Total Cost</div>
+          <div className="text-3xl font-bold mt-2">{stats ? `$${Number(stats.total_cost).toFixed(2)}` : '-'}</div>
+          <div className="text-xs text-gray-500 mt-1">Total campaign spend</div>
+        </div>
+        <div className="border rounded p-4">
+          <div className="text-sm text-gray-600">Total Duration</div>
+          <div className="text-3xl font-bold mt-2">{stats ? `${Number(stats.total_duration).toFixed(1)}s` : '-'}</div>
+          <div className="text-xs text-gray-500 mt-1">Total call time</div>
+        </div>
+        <div className="border rounded p-4">
+          <div className="text-sm text-gray-600">Avg Cost</div>
+          <div className="text-3xl font-bold mt-2">{stats ? `$${Number(stats.avg_cost).toFixed(2)}` : '-'}</div>
+          <div className="text-xs text-gray-500 mt-1">Average cost per call</div>
+        </div>
+        <div className="border rounded p-4">
+          <div className="text-sm text-gray-600">Avg Duration</div>
+          <div className="text-3xl font-bold mt-2">{stats ? `${Number(stats.avg_duration).toFixed(1)}s` : '-'}</div>
+          <div className="text-xs text-gray-500 mt-1">Average call length</div>
+        </div>
+      </div>
 
       <div className="mb-4 flex items-center justify-between">
         <div>
