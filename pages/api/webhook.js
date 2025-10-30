@@ -46,7 +46,11 @@ export default async function handler(req, res) {
     const parts = ['llm','network','platform','synthesizer','transcriber']
     return parts.reduce((sum, k) => sum + (Number(cb[k]) || 0), 0)
   })()
-  const cost = payload.total_cost || payload.cost || transfer.cost || cost_from_breakdown || null
+  // Bolna typically reports total_cost and cost_breakdown in cents. Normalize to dollars.
+  const centsPreferred = payload.total_cost ?? transfer.cost ?? cost_from_breakdown
+  const cost = centsPreferred != null
+    ? Number(centsPreferred) / 100
+    : (payload.cost != null ? Number(payload.cost) : null)
 
   // Additional mapped fields for display (not persisted)
   const provider = telephony.provider || transfer.provider || null
